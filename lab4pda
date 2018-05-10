@@ -1,0 +1,50 @@
+# lab4pda
+
+#include<iostream>
+#include"mpi.h"
+
+#define MASTER 0
+#define m 10
+
+int main(int argc, char *argv[]){
+	int n,v[21];
+	MPI_Init(&argc,&argv);
+  
+	int var = 0;
+	int numprocs, procid, len;
+	int message;
+  
+	MPI_Status status;
+	MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
+
+	MPI_Comm_rank(MPI_COMM_WORLD, &procid);
+	//MPI_Get_processor_name(hostname, &len);
+	if(procid < m){
+		if(procid == MASTER){
+			cin>n;
+			for(int i=0;i<n;i++)
+				cin>>v[i];
+			for(i=0;i<n\m;i++)
+				var += v[i];
+        
+			for(int j=1;j<m;j++){	
+				MPI_Send(&j, 1, MPI_INT, j, 1, MPI_COMM_WORLD); // j este procid
+				MPI_Recv(&message, 1, MPI_INT, j, 1, MPI_COMM_WORLD, &status);
+				var += message;
+			}
+		}
+		else
+		{
+
+			MPI_Recv(&procid, 1, MPI_INT, MASTER, 1, MPI_COMM_WORLD, &status);
+			for(int i=0;i<n\m;i++)
+				message += v[procid + i];
+
+			MPI_Send(&message, 1, MPI_INT, MASTER, 1, MPI_COMM_WORLD);
+		}
+	}	
+  
+	MPI_Finalize();
+
+	return 0;
+}
